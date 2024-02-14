@@ -14,6 +14,7 @@ import Language.Haskell.TH hiding (reifyType)
 import Language.Haskell.TH.Syntax hiding (reifyType)
 import Language.Haskell.TH.Datatype (tvName)
 
+
 -- testing presence of definitions
 
 isDefined :: String -> Q Exp

@@ -16,7 +16,9 @@ import Data.List
 -- Hint! pattern matching is your friend.
 
 binomial :: Integer -> Integer -> Integer
-binomial = todo
+binomial n 0 = 1
+binomial 0 k = 0
+binomial n k = binomial (n-1) k + binomial (n-1) (k-1)
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the odd factorial function. Odd factorial is like
@@ -27,7 +29,11 @@ binomial = todo
 --   oddFactorial 6 ==> 5*3*1 ==> 15
 
 oddFactorial :: Integer -> Integer
-oddFactorial = todo
+oddFactorial 0 = 0  
+oddFactorial 1 = 1  
+oddFactorial n
+    | n `mod` 2 == 0 = oddFactorial (n-1)  
+    | otherwise      = n * oddFactorial (n - 2)  
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the Euclidean Algorithm for finding the greatest
@@ -59,8 +65,9 @@ oddFactorial = todo
 -- * https://en.wikipedia.org/wiki/Euclidean_algorithm
 
 myGcd :: Integer -> Integer -> Integer
-myGcd = todo
-
+myGcd a 0 = a
+myGcd 0 b = b
+myGcd a b = myGcd b (a `mod` b)
 ------------------------------------------------------------------------------
 -- Ex 4: Implement the function leftpad which adds space characters
 -- to the start of the string until it is long enough.
@@ -74,8 +81,10 @@ myGcd = todo
 -- * you can combine strings with the ++ operator.
 -- * you can compute the length of a string with the length function
 
-leftpad :: String -> Int -> String
-leftpad = todo
+leftpad :: String -> Int -> String 
+leftpad s i
+    | length s >= i = s
+    | otherwise         = leftpad (' ' : s) i
 
 ------------------------------------------------------------------------------
 -- Ex 5: let's make a countdown for a rocket! Given a number, you
@@ -91,7 +100,12 @@ leftpad = todo
 -- * you'll probably need a recursive helper function
 
 countdown :: Integer -> String
-countdown = todo
+countdown n = "Ready! " ++ countdownHelper n ++ " Liftoff!"
+
+countdownHelper :: Integer -> String
+countdownHelper 0 = ""
+countdownHelper n = show n ++ "... " ++ countdownHelper (n - 1)
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: implement the function smallestDivisor that returns the

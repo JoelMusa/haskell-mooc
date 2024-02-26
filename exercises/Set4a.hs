@@ -208,12 +208,13 @@ freqs = foldr updateFreq Map.empty
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
-
-withdraw account amount bank =
-  case Map.lookup account bank of
-    Nothing  -> bank                                   
-    Just sum -> Map.insert account (sum-amount) bank
+transfer from to amount bank
+    | Map.notMember from bank = bank  
+    | Map.notMember to bank = bank    
+    | amount < 0 = bank               
+    | Map.findWithDefault 0 from bank < amount = bank  
+    | otherwise = Map.adjust (\balance -> balance - amount) from $ Map.adjust (\balance -> balance + amount) to bank
+    
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
 --

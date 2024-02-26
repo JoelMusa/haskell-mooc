@@ -80,8 +80,8 @@ middle x y z = sort [x, y, z] !! 1
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: Num a => [a] -> a
-rangeOf = todo
+rangeOf :: (Ord a, Num a) => [a] -> a
+rangeOf xs = maximum xs - minimum xs 
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a (non-empty) list of (non-empty) lists, return the longest
@@ -99,7 +99,12 @@ rangeOf = todo
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
 
-longest = todo
+longest :: Ord a => [[a]] -> [a]
+longest lists = minimumBy compareLength lists
+    where
+    compareLength xs ys
+        | length xs == length ys = compare (head xs) (head ys)
+        | otherwise              = compare (length ys) (length xs)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
@@ -115,8 +120,13 @@ longest = todo
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
-incrementKey = todo
+incrementKey :: (Ord k, Num v) => k -> [(k,v)] -> [(k,v)]
+incrementKey k list =
+    case Map.lookup k keyValueMap of
+        Nothing -> list
+        Just v  -> Map.toList $ Map.insert k (v+1) keyValueMap
+    where
+        keyValueMap = Map.fromList list
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
@@ -131,7 +141,7 @@ incrementKey = todo
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = sum xs / fromIntegral (length xs)
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
@@ -149,8 +159,11 @@ average xs = todo
 --   winner (Map.fromList [("Mike",13607),("Bob",5899),("Lisa",5899)]) "Lisa" "Bob"
 --     ==> "Lisa"
 
-winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner :: Ord Int => Map.Map String Int -> String -> String -> String
+winner score player1 player2 =
+    let score1 = Map.findWithDefault 0 player1 score
+        score2 = Map.findWithDefault 0 player2 score
+    in if score1 >= score2 then player1 else player2
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
@@ -165,7 +178,9 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs = foldr updateFreq Map.empty
+  where
+    updateFreq x = Map.alter (Just . maybe 1 (+1)) x
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -195,6 +210,10 @@ freqs xs = todo
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
 transfer from to amount bank = todo
 
+withdraw account amount bank =
+  case Map.lookup account bank of
+    Nothing  -> bank                                   
+    Just sum -> Map.insert account (sum-amount) bank
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
 --

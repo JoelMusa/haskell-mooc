@@ -121,12 +121,10 @@ longest lists = minimumBy compareLength lists
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
 incrementKey :: (Ord k, Num v) => k -> [(k,v)] -> [(k,v)]
-incrementKey k list =
-    case Map.lookup k keyValueMap of
-        Nothing -> list
-        Just v  -> Map.toList $ Map.insert k (v+1) keyValueMap
-    where
-        keyValueMap = Map.fromList list
+incrementKey _ [] = []
+incrementKey k ((key,value):rest)
+    | k == key  = (key, value + 1) : incrementKey k rest
+    | otherwise = (key, value) : incrementKey k rest
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional

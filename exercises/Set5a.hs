@@ -136,7 +136,7 @@ data Student = Freshman | NthYear Int | Graduated
 -- graduated student stays graduated even if he studies.
 
 study :: Student -> Student
-study Freshman = Freshman                 
+study Freshman = NthYear 1                 
 study (NthYear n)
   | n < 7 = NthYear (n + 1)               
   | otherwise = Graduated                   
@@ -169,7 +169,7 @@ zero = Up 0
 -- get returns the counter value
 get :: UpDown -> Int
 get (Up n) = n
-get (Down n) = -n
+get (Down n) = n
 
 -- tick increases an increasing counter by one or decreases a
 -- decreasing counter by one
@@ -181,7 +181,7 @@ tick (Down n) = Down (n-1)
 -- vice versa
 toggle :: UpDown -> UpDown
 toggle (Up n) = Down n
-toggle (Down n) = Up (-n)
+toggle (Down n) = Up n
 
 ------------------------------------------------------------------------------
 -- Ex 8: you'll find a Color datatype below. It has the three basic

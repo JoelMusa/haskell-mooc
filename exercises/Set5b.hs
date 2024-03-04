@@ -18,8 +18,6 @@ valAtRoot :: Tree a -> Maybe a
 valAtRoot Empty = Nothing
 valAtRoot (Node root _ _) = Just root
 
---data Tree a = Empty | Node a (Tree a) (Tree a)
---deriving (Show, Eq)
 ------------------------------------------------------------------------------
 -- Ex 2: compute the size of a tree, that is, the number of Node
 -- constructors in it
@@ -29,7 +27,8 @@ valAtRoot (Node root _ _) = Just root
 --   treeSize (Node 3 (Node 7 Empty Empty) (Node 1 Empty Empty))  ==>  3
 
 treeSize :: Tree a -> Int
-treeSize t = todo
+treeSize Empty = 0
+treeSize (Node _ x y) = 1 + treeSize x + treeSize y
 
 ------------------------------------------------------------------------------
 -- Ex 3: get the largest value in a tree of positive Ints. The
@@ -40,7 +39,8 @@ treeSize t = todo
 --   treeMax (Node 3 (Node 5 Empty Empty) (Node 4 Empty Empty))  ==>  5
 
 treeMax :: Tree Int -> Int
-treeMax = todo
+treeMax Empty = 0
+treeMax (Node a x y) = max a (max (treeMax x) (treeMax y))
 
 ------------------------------------------------------------------------------
 -- Ex 4: implement a function that checks if all tree values satisfy a
@@ -52,7 +52,9 @@ treeMax = todo
 --   allValues (>0) (Node 1 Empty (Node 0 Empty Empty))  ==>  False
 
 allValues :: (a -> Bool) -> Tree a -> Bool
-allValues condition tree = todo
+allValues _ Empty = True
+allValues condition (Node x y z) =
+    condition x && allValues condition y && allValues condition z
 
 ------------------------------------------------------------------------------
 -- Ex 5: implement map for trees.
@@ -64,7 +66,8 @@ allValues condition tree = todo
 --   ==> (Node 2 (Node 3 Empty Empty) (Node 4 Empty Empty))
 
 mapTree :: (a -> b) -> Tree a -> Tree b
-mapTree f t = todo
+mapTree _ Empty = Empty
+mapTree n (Node x y z) = Node (n x) (mapTree n y) (mapTree n z)
 
 ------------------------------------------------------------------------------
 -- Ex 6: given a value and a tree, build a new tree that is the same,
@@ -108,7 +111,10 @@ mapTree f t = todo
 --                 (Node 3 Empty Empty))
 
 cull :: Eq a => a -> Tree a -> Tree a
-cull val tree = todo
+cull _ Empty = Empty
+cull val (Node x y z)
+    | x == val = Empty  
+    | otherwise = Node x (cull val y) (cull val z)
 
 ------------------------------------------------------------------------------
 -- Ex 7: check if a tree is ordered. A tree is ordered if:
@@ -150,7 +156,12 @@ cull val tree = todo
 --                     (Node 3 Empty Empty))   ==>   True
 
 isOrdered :: Ord a => Tree a -> Bool
-isOrdered = todo
+isOrdered Empty = True
+isOrdered (Node x y z) =
+    allValues (< x) y &&  
+    allValues (> x) z &&  
+    isOrdered y &&           
+    isOrdered z 
 
 ------------------------------------------------------------------------------
 -- Ex 8: a path in a tree can be represented as a list of steps that
@@ -169,7 +180,11 @@ data Step = StepL | StepR
 --   walk [StepL,StepL] (Node 1 (Node 2 Empty Empty) Empty)  ==>  Nothing
 
 walk :: [Step] -> Tree a -> Maybe a
-walk = todo
+walk [] (Node x _ _) = Just x 
+walk [] Empty = Nothing 
+walk (StepL:steps) (Node _ y _) = walk steps y  
+walk (StepR:steps) (Node _ _ z) = walk steps z  
+walk _ _ = Nothing 
 
 ------------------------------------------------------------------------------
 -- Ex 9: given a tree, a path and a value, set the value at the end of

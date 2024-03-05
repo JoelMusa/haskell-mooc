@@ -261,10 +261,3 @@ data Color = Red | Green | Blue
 
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
-
-Class Cycle a where
-  step :: a -> a
-  stepMany :: step a -> a
-
-Instance Color a where
-  step x = 

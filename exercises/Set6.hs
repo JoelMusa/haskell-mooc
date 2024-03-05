@@ -35,8 +35,6 @@ instance Ord Country where
   compare _ Finland = GT                   
   compare Norway _ = LT                    
   compare _ Norway = GT                     
-  compare Switzerland _ = GT              
-  compare _ Switzerland = LT  
 
 ------------------------------------------------------------------------------
 -- Ex 3: Implement an Eq instance for the type Name which contains a String.
@@ -108,6 +106,13 @@ instance Price Milk where
 -- price [Just ChocolateEgg, Nothing, Just ChickenEgg]  ==> 50
 -- price [Nothing, Nothing, Just (Milk 1), Just (Milk 2)]  ==> 45
 
+instance Price a => Price (Maybe a) where
+  price Nothing = 0
+  price (Just x) = price x
+
+instance Price a => Price [a] where
+  price [] = 0
+  price xs = sum $ map price xs
 
 ------------------------------------------------------------------------------
 -- Ex 7: below you'll find the datatype Number, which is either an
@@ -119,7 +124,12 @@ instance Price Milk where
 data Number = Finite Integer | Infinite
   deriving (Show,Eq)
 
-
+instance Ord Number where
+  compare (Finite _) Infinite = LT      
+  compare Infinite (Finite _) = GT      
+  compare (Finite x) (Finite y) = compare x y  
+  compare Infinite Infinite = EQ 
+  
 ------------------------------------------------------------------------------
 -- Ex 8: rational numbers have a numerator and a denominator that are
 -- integers, usually separated by a horizontal bar or a slash:
@@ -144,8 +154,8 @@ data RationalNumber = RationalNumber Integer Integer
   deriving Show
 
 instance Eq RationalNumber where
-  p == q = todo
-
+  RationalNumber a b == RationalNumber c d = a*d == b*c
+  
 ------------------------------------------------------------------------------
 -- Ex 9: implement the function simplify, which simplifies a rational
 -- number by removing common factors of the numerator and denominator.
@@ -164,7 +174,8 @@ instance Eq RationalNumber where
 -- Hint: Remember the function gcd?
 
 simplify :: RationalNumber -> RationalNumber
-simplify p = todo
+simplify (RationalNumber n d) = RationalNumber (n `div` divisor) (d `div` divisor)
+  where divisor = gcd n d
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the typeclass Num for RationalNumber. The results
@@ -185,12 +196,15 @@ simplify p = todo
 --   signum (RationalNumber 0 2)             ==> RationalNumber 0 1
 
 instance Num RationalNumber where
-  p + q = todo
-  p * q = todo
-  abs q = todo
-  signum q = todo
-  fromInteger x = todo
-  negate q = todo
+  RationalNumber n1 d1 + RationalNumber n2 d2 = simplify (RationalNumber (n1*d2 + n2*d1) (d1*d2))
+  RationalNumber n1 d1 * RationalNumber n2 d2 = simplify (RationalNumber (n1*n2) (d1*d2))
+  abs (RationalNumber n d) = RationalNumber (abs n) (abs d)
+  signum (RationalNumber n d)
+    | n == 0 = 0
+    | n * d > 0 = 1
+    | otherwise = -1
+  fromInteger x = RationalNumber x 1
+  negate (RationalNumber n d) = RationalNumber (-n) d
 
 ------------------------------------------------------------------------------
 -- Ex 11: a class for adding things. Define a class Addable with a
@@ -205,6 +219,17 @@ instance Num RationalNumber where
 --   add [1,2] [3,4]        ==>  [1,2,3,4]
 --   add zero [True,False]  ==>  [True,False]
 
+class Addable a where
+  zero :: a
+  add :: a -> a -> a
+
+instance Addable Integer where
+  zero = 0
+  add = (+)
+
+instance Addable [a] where
+  zero = []
+  add = (++)
 
 ------------------------------------------------------------------------------
 -- Ex 12: cycling. Implement a type class Cycle that contains a
@@ -233,6 +258,13 @@ instance Num RationalNumber where
 
 data Color = Red | Green | Blue
   deriving (Show, Eq)
+
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
 
+Class Cycle a where
+  step :: a -> a
+  stepMany :: step a -> a
+
+Instance Color a where
+  step x = 

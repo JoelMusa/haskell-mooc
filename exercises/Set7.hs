@@ -57,7 +57,14 @@ member x (Set xs) = elem x xs
 
 -- add a member to a set
 add :: a -> Set a -> Set a
-add = todo
+add x (Set xs) = Set (insertSorted x xs)
+
+insertSorted :: Ord a => a -> [a] -> [a]
+insertSorted x [] = [x]
+insertSorted x (y:ys)
+  | x == y = y : ys
+  | x < y = x : y : ys
+  | otherwise = y : insertSorted x ys
 
 ------------------------------------------------------------------------------
 -- Ex 3: a state machine for baking a cake. The type Event represents

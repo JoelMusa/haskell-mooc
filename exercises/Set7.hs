@@ -100,17 +100,7 @@ data Event = AddEggs | AddFlour | AddSugar | Mix | Bake
 data State = Start | AddedEggs | AddedFlour | AddedSugar | Mixed | Baked | Error | Finished
   deriving (Eq,Show)
 
-step :: State -> Event -> State
-step Start AddEggs = AddedEggs
-step AddedEggs AddFlour = AddedFlour
-step AddedEggs AddSugar = AddedSugar
-step AddedFlour AddSugar = Mixed
-step AddedSugar AddFlour = Mixed
-step AddedSugar Mix = Mixed
-step AddedFlour Mix = Mixed
-step Mixed Bake = Baked
-step Baked _ = Finished
-step _ _ = Error
+step = todo
 
 -- do not edit this
 bake :: [Event] -> State
@@ -138,7 +128,7 @@ average xs = sum xs / fromIntegral (length xs)
 -- PS. The Data.List.NonEmpty type has been imported for you
 
 reverseNonEmpty :: NonEmpty a -> NonEmpty a
-reverseNonEmpty (x :| xs) = fromList (reverse (x:xs))
+reverseNonEmpty = todo
 
 ------------------------------------------------------------------------------
 -- Ex 6: implement Semigroup instances for the Distance, Time and
@@ -167,6 +157,18 @@ instance Semigroup Velocity where
 --
 -- What are the class constraints for the instances?
 
+instance (Ord a) => Semigroup (Set a) where
+    (Set xs) <> (Set ys) = Set (merge xs ys)
+      where
+        merge [] ys = ys
+        merge xs [] = xs
+        merge (x:xs) (y:ys)
+          | x == y = x : merge xs ys
+          | x < y  = x : merge xs (y:ys)
+          | otherwise = y : merge (x:xs) ys
+
+instance (Ord a) => Monoid (Set a) where
+    mempty = Set []
 
 ------------------------------------------------------------------------------
 -- Ex 8: below you'll find two different ways of representing
@@ -189,29 +191,43 @@ instance Semigroup Velocity where
 
 data Operation1 = Add1 Int Int
                 | Subtract1 Int Int
+                | Multiply1 Int Int
   deriving Show
 
 compute1 :: Operation1 -> Int
 compute1 (Add1 i j) = i+j
 compute1 (Subtract1 i j) = i-j
+compute1 (Multiply1 i j) = i * j
 
 show1 :: Operation1 -> String
-show1 = todo
+show1 (Add1 i j) = show i ++ "+" ++ show j
+show1 (Subtract1 i j) = show i ++ "-" ++ show j
+show1 (Multiply1 i j) = show i ++ "*" ++ show j
 
 data Add2 = Add2 Int Int
   deriving Show
+
 data Subtract2 = Subtract2 Int Int
+  deriving Show
+
+data Multiply2 = Multiply2 Int Int
   deriving Show
 
 class Operation2 op where
   compute2 :: op -> Int
+  show2 :: op -> String
 
 instance Operation2 Add2 where
-  compute2 (Add2 i j) = i+j
+  compute2 (Add2 i j) = i + j
+  show2 (Add2 i j) = show i ++ "+" ++ show j
 
 instance Operation2 Subtract2 where
-  compute2 (Subtract2 i j) = i-j
+  compute2 (Subtract2 i j) = i - j
+  show2 (Subtract2 i j) = show i ++ "-" ++ show j
 
+instance Operation2 Multiply2 where
+  compute2 (Multiply2 i j) = i * j
+  show2 (Multiply2 i j) = show i ++ "*" ++ show j
 
 ------------------------------------------------------------------------------
 -- Ex 9: validating passwords. Below you'll find a type
@@ -240,7 +256,11 @@ data PasswordRequirement =
   deriving Show
 
 passwordAllowed :: String -> PasswordRequirement -> Bool
-passwordAllowed = todo
+passwordAllowed password (MinimumLength len) = length password >= len
+passwordAllowed password (ContainsSome chars) = any (`elem` chars) password
+passwordAllowed password (DoesNotContain chars) = not (any (`elem` chars) password)
+passwordAllowed password (And req1 req2) = passwordAllowed password req1 && passwordAllowed password req2
+passwordAllowed password (Or req1 req2) = passwordAllowed password req1 || passwordAllowed password req2
 
 ------------------------------------------------------------------------------
 -- Ex 10: a DSL for simple arithmetic expressions with addition and

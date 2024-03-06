@@ -30,7 +30,7 @@ velocity (Distance d) (Time t) = Velocity (d / t)
 
 -- travel computes a distance given a velocity and a time
 travel :: Velocity -> Time -> Distance
-travel (Time t) (Velocity v) = travel (t * v)
+travel (Velocity v) (Time t) = Distance (t * v)
 
 ------------------------------------------------------------------------------
 -- Ex 2: let's implement a simple Set datatype. A Set is a list of
@@ -56,15 +56,13 @@ member :: Eq a => a -> Set a -> Bool
 member x (Set xs) = elem x xs
 
 -- add a member to a set
-add :: a -> Set a -> Set a
-add x (Set xs) = Set (insertSorted x xs)
-
-insertSorted :: Ord a => a -> [a] -> [a]
-insertSorted x [] = [x]
-insertSorted x (y:ys)
-  | x == y = y : ys
-  | x < y = x : y : ys
-  | otherwise = y : insertSorted x ys
+add :: Ord a => a -> Set a -> Set a
+add x (Set xs) = Set (insertInOrder x xs)
+  where insertInOrder y [] = [y]
+        insertInOrder y (z:zs) 
+          | y < z     = y : z : zs
+          | y == z    = z : zs
+          | otherwise = z : insertInOrder y zs
 
 ------------------------------------------------------------------------------
 -- Ex 3: a state machine for baking a cake. The type Event represents
@@ -99,10 +97,20 @@ insertSorted x (y:ys)
 data Event = AddEggs | AddFlour | AddSugar | Mix | Bake
   deriving (Eq,Show)
 
-data State = Start | Error | Finished
+data State = Start | AddedEggs | AddedFlour | AddedSugar | Mixed | Baked | Error | Finished
   deriving (Eq,Show)
 
-step = todo
+step :: State -> Event -> State
+step Start AddEggs = AddedEggs
+step AddedEggs AddFlour = AddedFlour
+step AddedEggs AddSugar = AddedSugar
+step AddedFlour AddSugar = Mixed
+step AddedSugar AddFlour = Mixed
+step AddedSugar Mix = Mixed
+step AddedFlour Mix = Mixed
+step Mixed Bake = Baked
+step Baked _ = Finished
+step _ _ = Error
 
 -- do not edit this
 bake :: [Event] -> State
@@ -122,15 +130,15 @@ bake events = go Start events
 --   average (1.0 :| [2.0,3.0])  ==>  2.0
 
 average :: Fractional a => NonEmpty a -> a
-average = todo
-
+average xs = sum xs / fromIntegral (length xs)
+  
 ------------------------------------------------------------------------------
 -- Ex 5: reverse a NonEmpty list.
 --
 -- PS. The Data.List.NonEmpty type has been imported for you
 
 reverseNonEmpty :: NonEmpty a -> NonEmpty a
-reverseNonEmpty = todo
+reverseNonEmpty (x :| xs) = fromList (reverse (x:xs))
 
 ------------------------------------------------------------------------------
 -- Ex 6: implement Semigroup instances for the Distance, Time and
